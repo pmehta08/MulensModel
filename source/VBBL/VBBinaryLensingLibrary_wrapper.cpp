@@ -10,6 +10,14 @@ extern "C" {
   }
 }
 
+extern "C" {
+  double VBBinaryLensing_BinaryMagDark_2(double a,double q,double y1,double y2,double RSv,double a1, double Tol) {
+    static VBBinaryLensing VBBL;
+    
+    return VBBL.BinaryMag2(a, q, y1, y2, RSv, a1, Tol);
+  }
+}
+
 extern "C" double* VBBL_SG12_5(double p0, double p1, 
                     double p2, double p3, double p4, double p5, double p6, 
                     double p7, double p8, double p9, double p10, double p11) {
