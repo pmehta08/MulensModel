@@ -366,6 +366,11 @@ class Model(object):
                     flux_ratio_constraint = dict_constraint[None]
             elif isinstance(flux_ratio_constraint, str):
                 flux_ratio_constraint = dict_constraint[flux_ratio_constraint]
+# HERE - we have to add the stuff below
+# And we have to add checks on bands.
+# And we should check that one can specify constraint as a MulensData object that is different from the one which we're fitting.
+#            elif flux_ratio_constraint is None:
+#                flux_ratio_constraint = dict_constraint[None]
             magnification = self._magnification_2_sources(
                                 time, satellite_skycoord, gamma,
                                 flux_ratio_constraint, separate, same_dataset)
@@ -373,6 +378,16 @@ class Model(object):
             raise ValueError('strange number of sources: {:}'.format(
                     self.n_sources))
         return magnification
+
+    def _magnification_constraint(self, flux_ratio_constraint): # same_dataset als here?
+        """
+        Find the flux ratio constraint - either return float based on
+        internal values or the input MulensData.
+
+        flux_ratio_constraint:
+            :py:class:`~MulensModel.mulensdata.MulensData` or *str*
+        """
+        pass
 
     @property
     def data_magnification(self):
