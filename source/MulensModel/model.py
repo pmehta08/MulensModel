@@ -259,10 +259,14 @@ class Model(object):
             else:
                 raise ValueError('same_dataset must be True or False, not ' +
                                  '{:}'.format(same_dataset))
-            self._fit = Fit(data=flux_ratio_constraint, magnification=mags)
-            self._fit.fit_fluxes()
-            f_s = self._fit.flux_of_sources(flux_ratio_constraint)
+            fit = Fit(data=flux_ratio_constraint, magnification=mags)
+            fit.fit_fluxes()
+            f_s = fit.flux_of_sources(flux_ratio_constraint)
             source_flux_ratio = f_s[1] / f_s[0]
+            if self._fit is None:
+                self._fit = fit
+            else:
+                self._fit.update(fit)
 
         magnification = mag_1 + mag_2 * source_flux_ratio
         magnification /= (1. + source_flux_ratio)

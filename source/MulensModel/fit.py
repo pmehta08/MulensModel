@@ -282,8 +282,14 @@ class Fit(object):
         assert isinstance(fit, Fit)
         assert self.get_n_sources() == fit.get_n_sources()
 
-        self._datasets.extend(fit._datasets)
-        self._magnification.extend(fit._magnification)
+        for (data, mag) in zip(fit._datasets, fit._magnification):
+            if data not in self._datasets:
+                self._datasets.append(data)
+                self._magnification.append(mag)
+            else:
+                index = self._datasets.index(data)
+                self._magnification = (self._magnification[:index] + [mag] +
+                                       self._magnification[index+1:])
         self._flux_blending = {**self._flux_blending, **fit._flux_blending}
         self._flux_sources = {**self._flux_sources, **fit._flux_sources}
 
