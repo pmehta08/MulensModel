@@ -389,3 +389,15 @@ def test_binary_source_and_fluxes_for_bands():
     np.testing.assert_almost_equal(result_I, effective_mag_I)
     np.testing.assert_almost_equal(result_V, effective_mag_V)
 
+def test_binary_source_magnification():
+    """
+    Simple test on binary source magnification calculated via
+    Model.magnification() with source flux ratio set via
+    Model.model.set_source_flux_ratio().
+    """
+    model = Model({'t_0_1': 5000., 'u_0_1': 0.05,
+                   't_0_2': 5100., 'u_0_2': 0.003, 't_E': 30.})
+    model.set_source_flux_ratio(10.)
+    mag = model.magnification([5000.])
+    np.testing.assert_almost_equal(mag, 2.7397419525)
+
