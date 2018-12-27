@@ -223,7 +223,7 @@ class Event(object):
 
         Returns :
             chi2: *float*
-                chi2 for dataset[index_dataset].
+                chi2 for :py:attr:`~datasets[index_dataset]`.
 
         """
         if self.model.n_sources > 1 and fit_blending is False:
@@ -232,9 +232,13 @@ class Event(object):
         dataset = self.datasets[index_dataset]
         magnification = self.model.get_data_magnification(dataset)
 
-        if self.model.n_sources != 1:
-            self.fit = self.model.fit
-        else:
+        #if self.model.n_sources != 1 and self.model.fit is not None:
+           #self.fit = self.model.fit
+        #else:
+# The code above optimized using Fit in models with binary source, though
+# it fails currently - see test test_event_chi2_binary_source_2datasets in
+# tests/test_Event.py
+        if True:
             self.fit = Fit(data=dataset, magnification=[magnification])
             if fit_blending is not None:
                 self.fit.fit_fluxes(fit_blending=fit_blending)
