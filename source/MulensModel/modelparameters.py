@@ -13,6 +13,7 @@ _valid_parameters = {
     'point lens': ['t_0, u_0, t_E'],
     'point lens alt': 'alternate: t_eff may be substituted for u_0 or t_E',
     'binary lens': ['s, q, alpha'],
+    'triple lens': ['s_21, s_31, q_21, q_31, psi, alpha'],
     'finite source': ['rho', '(for finite source effects)'],
     'finite source alt': 'alternate: t_star may be substituted for t_E or rho',
     'parallax': ['pi_E OR pi_E_N, pi_E_E', '(for parallax)'],
@@ -170,7 +171,7 @@ def which_parameters(*args):
 class ModelParameters(object):
     """
     A class for the basic microlensing model parameters (t_0, u_0,
-    t_E, rho, s, q, alpha, pi_E). Can handle point lens or binary
+    t_E, rho, s, q, alpha, pi_E_E etc.). Can handle point lens or binary
     lens. The pi_E assumes NE coordinates (Parallel, Perpendicular
     coordinates are not supported).
 
@@ -278,6 +279,13 @@ class ModelParameters(object):
             'dalpha_dt': {
                 'width': 18, 'precision': 5, 'unit': 'deg/yr',
                 'name': 'dalpha/dt'}
+            # Values below are just guesses:
+            's_21': {'width': 9, 'precision': 5},
+            's_31': {'width': 9, 'precision': 5},
+            'q_21': {'width': 12, 'precision': 8},
+            'q_31': {'width': 12, 'precision': 8},
+            'psi': {'width': 11, 'precision': 5, 'unit': 'deg'},
+            # end of guessed values.
         }
         # Add binary source parameters with the same settings.
         binary_source_keys = ['t_0_1', 't_0_2', 'u_0_1', 'u_0_2',
@@ -293,7 +301,8 @@ class ModelParameters(object):
         formats_keys = [
             't_0', 't_0_1', 't_0_2', 'u_0', 'u_0_1', 'u_0_2', 't_eff', 't_E',
             'rho', 'rho_1', 'rho_2', 't_star', 't_star_1', 't_star_2',
-            'pi_E_N', 'pi_E_E', 's', 'q', 'alpha', 'ds_dt', 'dalpha_dt'
+            'pi_E_N', 'pi_E_E', 's', 'q', 'alpha', 'ds_dt', 'dalpha_dt',
+            's_21', 's_31', 'q_21', 'q_31', 'psi'
         ]
 
         variables = ''
@@ -333,10 +342,12 @@ class ModelParameters(object):
         """
         Check that the user hasn't over-defined the ModelParameters.
         """
+        raise NotImplementedError('NOT YET IMPLEMENTED FOR TRIPLE LENS')
         # Make sure that there are no unwanted keys
         allowed_keys = set([
             't_0', 'u_0', 't_E', 't_eff', 's', 'q', 'alpha', 'rho', 't_star',
             'pi_E', 'pi_E_N', 'pi_E_E', 't_0_par', 'dalpha_dt', 'ds_dt',
+            's_21', 's_31', 'q_21', 'q_31', 'psi',
             't_0_kep', 't_0_1', 't_0_2', 'u_0_1', 'u_0_2', 'rho_1', 'rho_2',
             't_star_1', 't_star_2'])
         difference = set(keys) - allowed_keys
@@ -707,6 +718,46 @@ class ModelParameters(object):
 
         self.parameters['s'] = new_s
         self._update_sources('s', new_s)
+
+    @property
+    def s_21(self):
+        raise NotImplementedError('triple lens parameters')
+
+    @s_21.setter
+    def s_21(self, new_s_21):
+        raise NotImplementedError('triple lens parameters')
+
+    @property
+    def s_31(self):
+        raise NotImplementedError('triple lens parameters')
+
+    @s_31.setter
+    def s_31(self, new_s_31):
+        raise NotImplementedError('triple lens parameters')
+
+    @property
+    def q_21(self):
+        raise NotImplementedError('triple lens parameters')
+
+    @q_21.setter
+    def q_21(self, new_q_21):
+        raise NotImplementedError('triple lens parameters')
+
+    @property
+    def q_31(self):
+        raise NotImplementedError('triple lens parameters')
+
+    @q_31.setter
+    def q_31(self, new_q_31):
+        raise NotImplementedError('triple lens parameters')
+
+    @property
+    def psi(self):
+        raise NotImplementedError('triple lens parameters')
+
+    @psi.setter
+    def psi(self, new_psi):
+        raise NotImplementedError('triple lens parameters')
 
     @property
     def pi_E(self):

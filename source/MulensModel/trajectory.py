@@ -164,6 +164,8 @@ class Trajectory(object):
             # The above equations use alpha in counterclockwise
             # convention, i.e., the same as proposed by Skowron et
             # al. (2011)
+        elif self.parameters.n_lenses == 3:
+            raise NotImplementedError("triple lenses - we're working on it")
         else:
             raise NotImplementedError(
                 "trajectory for more than 2 lenses not handled yet")

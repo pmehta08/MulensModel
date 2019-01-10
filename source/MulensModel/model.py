@@ -1359,6 +1359,9 @@ class Model(object):
             methods_ok = [
                 'point_source', 'quadrupole', 'hexadecapole', 'vbbl',
                 'adaptive_contouring', 'point_source_point_lens']
+        elif self.n_lenses == 3:
+            methods_ok = [
+                'point_source', 'point_source_point_lens']
         else:
             msg = 'wrong value of Model.n_lenses: {:}'
             raise ValueError(msg.format(self.n_lenses))

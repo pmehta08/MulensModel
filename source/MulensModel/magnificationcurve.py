@@ -4,6 +4,7 @@ import warnings
 from MulensModel.trajectory import Trajectory
 from MulensModel.pointlens import PointLens, get_pspl_magnification
 from MulensModel.binarylens import BinaryLens
+from MulensModel.triplelens import TripleLens
 from MulensModel.modelparameters import ModelParameters
 
 
@@ -341,7 +342,7 @@ class MagnificationCurve(object):
             ``point_source_point_lens``:
                 Uses point-source _point_-_lens_ approximation; useful when you
                 consider binary lens but need magnification very far from
-                the lens (e.g. at separation u = 100).
+                the lens (e.g., at a separation u = 100).
 
         Returns :
             magnification: *np.ndarray*
@@ -403,6 +404,34 @@ class MagnificationCurve(object):
             magnification.append(m)
 
         return np.array(magnification)
+
+    #def get_triple_lens_magnification(self):
+        """
+        Calculate magnification for triple lens model.
+
+        Allowed magnification methods :
+            ``point_source``:
+                standard point source magnification calculation.
+
+            ``quadrupole``:
+                From `Gould 2008 ApJ, 681, 1593
+                <http://adsabs.harvard.edu/abs/2008ApJ...681.1593G>`_. See
+                :py:func:`~MulensModel.binarylens.BinaryLens.hexadecapole_magnification()`
+
+            ``hexadecapole``:
+                From `Gould 2008 ApJ, 681, 1593`_ See
+                :py:func:`~MulensModel.binarylens.BinaryLens.hexadecapole_magnification()`
+
+            ``point_source_point_lens``:
+                Uses point-source _point_-_lens_ approximation; useful when you
+                consider triple lens but need magnification very far from
+                the lens (e.g., at a separation u = 100).
+
+        Returns :
+            magnification: *np.ndarray*
+                Vector of magnifications.
+
+        """
 
     def _methods_for_epochs(self):
         """
