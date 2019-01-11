@@ -278,13 +278,13 @@ class ModelParameters(object):
                 'width': 11, 'precision': 5, 'unit': '/yr', 'name': 'ds/dt'},
             'dalpha_dt': {
                 'width': 18, 'precision': 5, 'unit': 'deg/yr',
-                'name': 'dalpha/dt'}
+                'name': 'dalpha/dt'},
             # Values below are just guesses:
             's_21': {'width': 9, 'precision': 5},
             's_31': {'width': 9, 'precision': 5},
             'q_21': {'width': 12, 'precision': 8},
             'q_31': {'width': 12, 'precision': 8},
-            'psi': {'width': 11, 'precision': 5, 'unit': 'deg'},
+            'psi': {'width': 11, 'precision': 5, 'unit': 'deg'}
             # end of guessed values.
         }
         # Add binary source parameters with the same settings.
