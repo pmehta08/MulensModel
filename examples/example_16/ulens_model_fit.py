@@ -455,7 +455,7 @@ class UlensModelFit(object):
             t_0_1='\\Delta t_{0,1}', u_0_1='u_{0,1}',
             t_0_2='\\Delta t_{0,2}', u_0_2='u_{0,2}', t_E='t_{\\rm E}',
             t_eff='t_{\\rm eff}', rho='\\rho', rho_1='\\rho_1',
-            rho_2='\\rho_2', t_star='t_{\\star}', t_star_1='t_{\\star,1}',
+            rho_2='\\rho_2', period = 'period',t_star='t_{\\star}', t_star_1='t_{\\star,1}',
             t_star_2='t_{\\star,2}', pi_E_N='\\pi_{{\\rm E},N}',
             pi_E_E='\\pi_{{\\rm E},E}', s='s', q='q', alpha='\\alpha',
             ds_dt='ds/dt', dalpha_dt='d\\alpha/dt',
