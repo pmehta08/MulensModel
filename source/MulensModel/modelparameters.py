@@ -14,11 +14,11 @@ from MulensModel.uniformcausticsampling import UniformCausticSampling
 _valid_parameters = {
     'point lens': ['t_0, u_0, t_E'],
     'point lens alt': 'alternate: t_eff may be substituted for u_0 or t_E',
-    'binary lens': ['s, q, alpha'],
+    'binary lens': ['s, q, alpha, period'],
     'binary lens alt':
         'alternate: ' +
         '(x_caustic_in, x_caustic_out, t_caustic_in, t_caustic_out) ' +
-        'may be substituted for (t_0, u_0, t_E, alpha)',
+        'may be substituted for (t_0, u_0, t_E, alpha, period)',
     'finite source': ['rho', '(for finite source effects)'],
     'finite source alt': 'alternate: t_star may be substituted for t_E or rho',
     'parallax': ['(pi_E_N, pi_E_E) OR pi_E', '(for parallax)'],
@@ -181,7 +181,7 @@ def which_parameters(*args):
 class ModelParameters(object):
     """
     A class for the basic microlensing model parameters (t_0, u_0,
-    t_E, rho, s, q, alpha, pi_E). Can handle point lens or binary
+    t_E, rho, s, q, alpha, pi_E, period). Can handle point lens or binary
     lens. The pi_E assumes NE coordinates (Parallel, Perpendicular
     coordinates are not supported).
 
@@ -499,7 +499,7 @@ class ModelParameters(object):
             'pi_E', 'pi_E_N', 'pi_E_E', 't_0_par', 'dalpha_dt', 'ds_dt',
             't_0_kep', 't_0_1', 't_0_2', 'u_0_1', 'u_0_2', 'rho_1', 'rho_2',
             't_star_1', 't_star_2', 'x_caustic_in', 'x_caustic_out',
-            't_caustic_in', 't_caustic_out'])
+            't_caustic_in', 't_caustic_out','period'])
         difference = set(keys) - allowed_keys
         if len(difference) > 0:
             derived_1 = ['gamma', 'gamma_perp', 'gamma_parallel']
@@ -851,6 +851,20 @@ class ModelParameters(object):
         else:
             self.parameters['alpha'] = new_alpha * u.deg
         self._update_sources('alpha', new_alpha)
+
+    @property
+    def period(self):
+        """
+        [*float, list, numpy.ndarray*]
+        orbital period of binary lens in days.
+        Stored as a *numpy.ndarray*.
+        """
+        return self.parameters['period']
+
+    @period.setter
+    def period(self, new_period):
+        self.parameters['period'] = new_period
+        self._update_sources('period', new_period)
 
     @property
     def q(self):

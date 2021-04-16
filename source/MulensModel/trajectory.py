@@ -180,15 +180,32 @@ class Trajectory(object):
             vector_x = vector_tau
             vector_y = vector_u
         elif self.parameters.n_lenses == 2:
-            if self.parameters.is_static():
+            #if self.parameters.is_static():
+               # sin_alpha = np.sin(self.parameters.alpha).value
+               # cos_alpha = np.cos(self.parameters.alpha).value
+            #else:
+             #   sin_alpha = np.sin(self.parameters.get_alpha(self.times)).value
+             #  cos_alpha = np.cos(self.parameters.get_alpha(self.times)).value
+            #sin_alpha = np.sin(self.parameters.alpha).value
+            #cos_alpha = np.cos(self.parameters.alpha).value
+            
+            period = self.parameters.period
+            t_0_kep = self.parameters.t_0_kep
+            t_0 = self.parameters.t_0
+            u_0 = self.parameters.u_0
+            t_E = self.parameters.t_E
+            alpha_0 = (self.parameters.alpha).value
+            
+            if period !=0:
+
+            #(X_s, Y_s = vector_x,vector_y)
+                vector_x = vector_tau*np.cos(alpha_0 - ((2*np.pi)/period)*(self.times - t_0_kep)) - vector_u*np.sin(alpha_0 - ((2*np.pi)/period)*(self.times - t_0_kep))
+                vector_y = vector_tau*np.sin(alpha_0 - ((2*np.pi)/period)*(self.times - t_0_kep)) + vector_u*np.cos(alpha_0 - ((2*np.pi)/period)*(self.times - t_0_kep))
+            else:
                 sin_alpha = np.sin(self.parameters.alpha).value
                 cos_alpha = np.cos(self.parameters.alpha).value
-            else:
-                sin_alpha = np.sin(self.parameters.get_alpha(self.times)).value
-                cos_alpha = np.cos(self.parameters.get_alpha(self.times)).value
-
-            vector_x = vector_tau * cos_alpha - vector_u * sin_alpha
-            vector_y = vector_tau * sin_alpha + vector_u * cos_alpha
+                vector_x = vector_tau * cos_alpha - vector_u * sin_alpha
+                vector_y = vector_tau * sin_alpha + vector_u * cos_alpha
             # The above equations use alpha in counterclockwise
             # convention, i.e., the same as proposed by Skowron et
             # al. (2011), but shifted by 180 deg.
@@ -243,7 +260,7 @@ class Trajectory(object):
             body='earth', time=Time(time_ref, format='jd', scale='tdb'))
         # Seems that get_body_barycentric depends on time system, but there is
         # no way to set BJD_TDB in astropy.Time().
-        # Likewise, get_jd12 depends on time system.
+        #Likewise, get_jd12 depends on time system.
 
         # Main calculation is in 2 lines below:
         delta_s = (position_ref.xyz.T - position.xyz.T).to(u.au).value
@@ -260,6 +277,7 @@ class Trajectory(object):
 
     def _satellite_parallax_trajectory(self):
         """calculate satellite parallax component of trajectory"""
+        # Calculate the parallax offset due to the satellite
         delta_satellite = self._get_delta_satellite()
         return self._project_delta(delta_satellite)
 
