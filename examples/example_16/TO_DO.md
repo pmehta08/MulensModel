@@ -14,6 +14,8 @@
 - binary source
 - x_caustic_in etc.
 - ob08092-o4_prior.yaml
+- posterior files
+- print model
 
 ## List of task to be done:
 
@@ -22,6 +24,7 @@
 - **some documentation - see above**
 - **add one more fitting method?**
 - **corner.py**
+- **requirements.txt**
 - n_walkers for EMCEE - default is x4 and remove from minimal yaml file - "SIMPLIFIES INPUT"
 - Mroz+20 - finish
 - print fixed parameters at begin or "no fixed parameters", so that full model can be extracted without the input file
