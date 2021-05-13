@@ -30,7 +30,7 @@ try:
 except Exception:
     raise ImportError('\nYou have to install MulensModel first!\n')
 
-__version__ = '0.15.1'
+__version__ = '0.17.0'
 
 
 class UlensModelFit(object):
@@ -107,12 +107,18 @@ class UlensModelFit(object):
             Parameters of the fit function. They depend on the method used.
 
             For EMCEE, the required parameters are ``n_walkers`` and
-            ``n_steps``. Allowed parameters are ``n_burn`` and
-            ``posterior_file_name``. The latter is *str* which indicates file
-            to which posterior samples will be written. It has to end in
-            ``.npy`` because we save in NumPy file format. You can read this
-            file using ``numpy.load()``. You will get an array with a shape
-            of (``n_walkers``, ``n_steps-n_burn``, ``n_parameters``).
+            ``n_steps``. You can also specify ``n_burn`` which controls
+            length of burn-in. Other options are described below.
+ 
+            It is possible to export posterior to a .npy file. Just provide
+            the file name as ``posterior file`` parameter. You can read this
+            file using ``numpy.load()``. You will get an array with a shape of
+            (``n_walkers``, ``n_steps-n_burn``, ``n_parameters``). You can
+            additionally add option ``posterior file fluxes`` for which
+            allowed values are ``all`` and *None* (``null`` in yaml file).
+            The value ``all`` means that additionally all source and blending
+            fluxes will be saved (``n_parameters`` increases by two times the
+            number of datasets).
 
         fit_constraints: *dict*
             Constraints on model other than minimal and maximal values.
@@ -154,8 +160,9 @@ class UlensModelFit(object):
         plots: *dict*
             Parameters of the plots to be made after the fit. Currently
             allowed keys are ``'triangle'`` and ``'best model'``.
-            The values are also dicts and currently accept only ``'file'``
-            key, and ``'time range'`` e.g.,
+            The values are also dicts and currently accepted keys are
+            ``'file'`` (both plots) and ``'time range'`` and
+            ``'magnitude range'`` (for best model plot), e.g.,
 
             .. code-block:: python
 
@@ -164,6 +171,7 @@ class UlensModelFit(object):
                   'best model':
                       'file': 'my_fit_best.png'
                       'time range': 2456000. 2456300.
+                      'magnitude range': 15.123 13.012
               }
         
         other_output: *dict*
@@ -286,9 +294,15 @@ class UlensModelFit(object):
         failed = import_failed.intersection(required_packages)
 
         if len(failed) > 0:
-            raise ImportError(
+            message = (
                 'Some of the required packages could not be imported:\n' +
                 " ".join(failed))
+            if "corner" in failed:
+                message += (
+                    "\nFor corner package it's enough that you run:\nwget " +
+                    "https://raw.githubusercontent.com/dfm/corner.py/" +
+                    "v2.0.0/corner/corner.py")
+            raise ImportError(message)
 
     def run_fit(self):
         """
@@ -356,21 +370,48 @@ class UlensModelFit(object):
                 self._plots[key] = dict()
 
         if 'best model' in self._plots:
-            if 'time range' in self._plots['best model']:
-                text = self._plots['best model']['time range'].split()
-                if len(text) != 2:
-                    raise ValueError(
-                        "'time range' for 'best model' should specify 2 " +
-                        "values (begin and end); got: " +
-                        str(self._plots['best model']['time range']))
-                t_0 = float(text[0])
-                t_1 = float(text[1])
-                if t_1 < t_0:
-                    raise ValueError(
-                        "Incorrect 'time range' for 'best model':\n" +
-                        text[0] + " " + text[1])
-                self._plots['best model']['time range'] = [t_0, t_1]
+            self._check_plots_parameters_best_model()
 
+    def _check_plots_parameters_best_model(self):
+        """
+        Check if parameters of best model make sense
+        """
+        allowed = set(['file', 'time range', 'magnitude range'])
+        unknown = set(self._plots['best model'].keys()) - allowed
+        if len(unknown) > 0:
+            raise ValueError(
+                'Unknown settings for "best model": {:}'.format(unknown))
+
+        if 'time range' in self._plots['best model']:
+            text = self._plots['best model']['time range'].split()
+            if len(text) != 2:
+                raise ValueError(
+                    "'time range' for 'best model' should specify 2 " +
+                    "values (begin and end); got: " +
+                    str(self._plots['best model']['time range']))
+            t_0 = float(text[0])
+            t_1 = float(text[1])
+            if t_1 < t_0:
+                raise ValueError(
+                    "Incorrect 'time range' for 'best model':\n" +
+                    text[0] + " " + text[1])
+            self._plots['best model']['time range'] = [t_0, t_1]
+
+        if 'magnitude range' in self._plots['best model']:
+            text = self._plots['best model']['magnitude range'].split()
+            if len(text) != 2:
+                raise ValueError(
+                    "'magnitude range' for 'best model' should specify 2 " +
+                    "values (begin and end); got: " +
+                    str(self._plots['best model']['magnitude range']))
+            mag_0 = float(text[0])
+            mag_1 = float(text[1])
+            if mag_1 > mag_0:
+                raise ValueError(
+                    "Incorrect 'magnitude range' for 'best model':\n" +
+                    text[0] + " " + text[1])
+            self._plots['best model']['magnitude range'] = [mag_0, mag_1]
+        
     def _check_model_parameters(self):
         """
         Check parameters of the MulensModel.Model provided by the user
@@ -559,7 +600,9 @@ class UlensModelFit(object):
         settings = self._fitting_parameters
 
         required = ['n_walkers', 'n_steps']
-        allowed = ['n_burn', 'posterior_file_name']
+        strings = ['posterior file', 'posterior file fluxes']
+        allowed = ['n_burn'] + strings
+
         full = required + allowed
 
         for required_ in required:
@@ -572,29 +615,44 @@ class UlensModelFit(object):
                              str(set(settings.keys()) - set(full)))
 
         for (p, value) in settings.items():
-            if not isinstance(value, int) and p != 'posterior_file_name':
+            if not isinstance(value, int) and p not in strings:
                 raise ValueError(
                     'Fitting parameter ' + p + ' requires int value; got: ' +
                     str(value) + ' ' + str(type(value)))
 
-        if 'posterior_file_name' not in settings:
+        if 'n_burn' in settings:
+            if settings['n_burn'] >= settings['n_steps']:
+                raise ValueError('You cannot set n_burn >= n_steps.')
+
+        if 'posterior file' not in settings:
             self._posterior_file_name = None
+            if 'posterior file fluxes' in settings:
+                raise ValueError('You cannot set "posterior file fluxes" ' +
+                                 'without setting "posterior file"')
         else:
-            name = settings['posterior_file_name']
+            name = settings['posterior file']
             if not isinstance(name, str):
-                raise ValueError('posterior_file_name must be string, got: ' +
+                raise ValueError('"posterior file" must be string, got: ' +
                                  str(type(name)))
             if name[-4:] != '.npy':
-                raise ValueError('posterior_file_name must end in ".npy", ' +
+                raise ValueError('"posterior file" must end in ".npy", ' +
                                  'got: ' + name)
             if path.exists(name):
                 if path.isfile(name):
-                    warnings.warn("Exisiting file " + name +
-                                  " will be overwritten")
+                    msg = "Exisiting file " + name + " will be overwritten"
+                    warnings.warn(msg)
                 else:
                     raise ValueError("The path provided for posterior (" +
                                      name + ") exsists and is a directory")
             self._posterior_file_name = name[:-4]
+            self._posterior_file_fluxes = None
+
+        if 'posterior file fluxes' in settings:
+            fluxes_allowed = ['all', None]
+            if settings['posterior file fluxes'] not in fluxes_allowed:
+                raise ValueError('Unrecognized "posterior file fluxes": ' +
+                                 settings['posterior file fluxes'])
+            self._posterior_file_fluxes = settings['posterior file fluxes']
 
     def _set_min_max_values(self):
         """
@@ -1282,6 +1340,10 @@ class UlensModelFit(object):
         """
         n_burn = self._fitting_parameters.get('n_burn', 0)
         samples = self._sampler.chain[:, n_burn:, :]
+        if self._posterior_file_fluxes == 'all':
+            blobs = np.array(self._sampler.blobs)
+            blobs = np.transpose(blobs, axes=(1, 0, 2))[:, n_burn:, :]
+            samples = np.dstack((samples, blobs))
         np.save(self._posterior_file_name, samples)
 
     def _make_plots(self):
@@ -1461,6 +1523,9 @@ class UlensModelFit(object):
         if ylim_r_max > 1.:
             ylim_r_max = 0.5
         ylim_residuals = [ylim_r_max, -ylim_r_max]
+
+        if 'magnitude range' in self._plots['best model']:
+            ylim = self._plots['best model']['magnitude range']
 
         return (ylim, ylim_residuals)
 
